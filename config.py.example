@@ -1,0 +1,12 @@
+# BHTOM API Configuration
+# 
+# Copy this file to config.py and fill in your credentials
+# Contact BHTOM administrators at https://bh-tom2.astrolabs.pl/ to obtain API access
+#
+# DO NOT commit config.py to version control!
+
+# Your BHTOM API Token
+BHTOM_API_TOKEN = "your_api_token_here"
+
+# Your BHTOM CSRF Token
+BHTOM_CSRF_TOKEN = "your_csrf_token_here"

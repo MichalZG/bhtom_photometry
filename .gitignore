@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Configuration (contains API credentials)
+config.py
+
+# Generated data directories
+data/*
+!data/.gitkeep
+output/*
+!output/.gitkeep
+plots/*
+!plots/.gitkeep
+
+# Legacy data files (if not moved to directories)
+photometry_data.pkl
+photometry_results.csv
+photometry_results_flux.csv
+photometry_results_flux_simple.dat
+photometry_results_diffmag.dat
+measurements.csv
+reference_objects.csv
+asteroid_positions.csv
+*.png
+
+# Example data to keep
+!wasp-46b_datasubset.dat
+!example_*.png
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

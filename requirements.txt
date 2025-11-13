@@ -1,0 +1,6 @@
+requests
+pandas
+astropy
+python-dateutil
+matplotlib
+numpy
