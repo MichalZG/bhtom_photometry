@@ -18,7 +18,7 @@ import numpy as np
 import os
 
 # API Configuration
-API_BASE_URL = "https://bh-tom2.astrolabs.pl/common/api/"
+API_BASE_URL = "https://bhtom.space/common/api/"
 
 # Load API credentials from environment variables or config file
 def load_api_credentials():

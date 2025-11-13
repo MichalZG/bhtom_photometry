@@ -1,7 +1,7 @@
 # BHTOM API Configuration
 # 
 # Copy this file to config.py and fill in your credentials
-# Contact BHTOM administrators at https://bh-tom2.astrolabs.pl/ to obtain API access
+# Contact BHTOM administrators at https://bhtom.space/ to obtain API access
 #
 # DO NOT commit config.py to version control!
 

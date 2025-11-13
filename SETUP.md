@@ -52,7 +52,7 @@ set BHTOM_CSRF_TOKEN=your_csrf_token_here
 
 ### 3. Obtain API Credentials
 
-Contact BHTOM administrators at https://bh-tom2.astrolabs.pl/ to request API access.
+Contact BHTOM administrators at https://bhtom.space/ to request API access.
 
 You will need:
 - **API Token** - for authentication

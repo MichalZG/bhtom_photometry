@@ -1,6 +1,6 @@
 # BHTOM Differential Photometry Pipeline
 
-A Python pipeline for downloading and processing photometric data from the [BHTOM (Black Hole TOM)](https://bh-tom2.astrolabs.pl/) database, specialized in **differential photometry** for stationary celestial objects such as variable stars, eclipsing binaries, and transiting exoplanets.
+A Python pipeline for downloading and processing photometric data from the [BHTOM (Black Hole TOM)](https://bhtom.space/) database, specialized in **differential photometry** for stationary celestial objects such as variable stars, eclipsing binaries, and transiting exoplanets.
 
 ## 🎯 Purpose
 
@@ -65,7 +65,7 @@ This pipeline automates the process of:
    
    Edit `config.py` and add your BHTOM API credentials.
    
-   **To obtain credentials:** Contact BHTOM administrators at https://bh-tom2.astrolabs.pl/
+   **To obtain credentials:** Contact BHTOM administrators at https://bhtom.space/
    
    See [SETUP.md](SETUP.md) for detailed configuration instructions.
 
@@ -193,7 +193,7 @@ bhtom_photometry/
 ### BHTOM API Configuration
 
 The BHTOM API configuration is in `get_data_bhtom.py`:
-- **API Base URL:** `https://bh-tom2.astrolabs.pl/common/api/`
+- **API Base URL:** `https://bhtom.space/common/api/`
 - **Authentication:** Token-based (configured via `config.py` or environment variables)
 
 ### Photometry Parameters
@@ -248,7 +248,7 @@ The pipeline includes several quality control features:
 ## 📝 Citation
 
 If you use this pipeline in your research, please acknowledge:
-- **BHTOM Database:** [https://bh-tom2.astrolabs.pl/](https://bh-tom2.astrolabs.pl/)
+- **BHTOM Database:** [https://bhtom.space/](https://bhtom.space/)
 - This pipeline (link to your repository)
 
 ## 👥 Contributing
