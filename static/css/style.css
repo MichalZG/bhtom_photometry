@@ -61,38 +61,34 @@ header p {
     font-size: 1.8em;
 }
 
-/* Example Loader */
-.example-loader {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    text-align: center;
+/* Section Header with Button */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
-.example-btn {
-    background: white;
-    color: #667eea;
-    padding: 15px 40px;
-    font-size: 1.1em;
+.section-header h2 {
+    margin-bottom: 0;
+}
+
+.example-btn-small {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 10px 20px;
+    font-size: 0.9em;
     font-weight: 600;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
 }
 
-.example-btn:hover {
+.example-btn-small:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-}
-
-.example-loader small {
-    display: block;
-    margin-top: 10px;
-    color: white;
-    opacity: 0.9;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 /* Form Styles */
@@ -358,6 +354,16 @@ footer a:hover {
     
     .form-actions {
         flex-direction: column;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .example-btn-small {
+        width: 100%;
     }
 }
 
