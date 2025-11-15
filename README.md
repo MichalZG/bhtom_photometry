@@ -24,6 +24,7 @@ This pipeline automates the process of:
 - ✅ **Comparison** with external aperture photometry
 - ✅ **DSS field visualization** with object marking
 - ✅ **Multiple output formats** (CSV, space-separated with flux or magnitude)
+- 🆕 **Web Interface** - User-friendly browser-based interface (see [WEB_INTERFACE.md](WEB_INTERFACE.md))
 
 ## 🛠️ Requirements
 

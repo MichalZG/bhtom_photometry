@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BHTOM Photometry Pipeline</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌟 BHTOM Differential Photometry Pipeline</h1>
+            <p>Web interface for processing photometric data from BHTOM</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Input Form -->
+            <section class="card" id="input-section">
+                <h2>📊 Pipeline Configuration</h2>
+                
+                <form id="pipeline-form">
+                    <div class="form-section">
+                        <h3>Target Information</h3>
+                        <div class="form-group">
+                            <label for="target_name">Target Name *</label>
+                            <input type="text" id="target_name" name="target_name" 
+                                   placeholder="e.g., WASP-46" required>
+                            <small>Name as it appears in BHTOM database</small>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="mjd_min">MJD Min *</label>
+                                <input type="number" id="mjd_min" name="mjd_min" 
+                                       placeholder="60826" step="0.00001" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="mjd_max">MJD Max *</label>
+                                <input type="number" id="mjd_max" name="mjd_max" 
+                                       placeholder="60828" step="0.00001" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="filter">Filter</label>
+                            <select id="filter" name="filter">
+                                <option value="all">All filters</option>
+                            </select>
+                            <small>Leave as 'All filters' to process all available data</small>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Target Coordinates (decimal degrees)</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="target_ra">RA *</label>
+                                <input type="number" id="target_ra" name="target_ra" 
+                                       placeholder="318.7370317" step="0.0000001" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="target_dec">Dec *</label>
+                                <input type="number" id="target_dec" name="target_dec" 
+                                       placeholder="-55.8719860" step="0.0000001" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Comparison Star 1</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="comp1_ra">RA *</label>
+                                <input type="number" id="comp1_ra" name="comp1_ra" 
+                                       placeholder="318.6979386" step="0.0000001" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="comp1_dec">Dec *</label>
+                                <input type="number" id="comp1_dec" name="comp1_dec" 
+                                       placeholder="-55.8612412" step="0.0000001" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Comparison Star 2</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="comp2_ra">RA *</label>
+                                <input type="number" id="comp2_ra" name="comp2_ra" 
+                                       placeholder="318.6808985" step="0.0000001" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="comp2_dec">Dec *</label>
+                                <input type="number" id="comp2_dec" name="comp2_dec" 
+                                       placeholder="-55.7915780" step="0.0000001" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="load-example">Load WASP-46 Example</button>
+                        <button type="submit" id="submit-btn">Start Pipeline</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Progress Section -->
+            <section class="card" id="progress-section" style="display:none;">
+                <h2>⏳ Pipeline Progress</h2>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <p id="progress-text">Initializing...</p>
+                </div>
+                <div id="progress-details"></div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="card" id="results-section" style="display:none;">
+                <h2>✅ Results</h2>
+                
+                <div class="results-summary" id="results-summary"></div>
+                
+                <div class="results-tabs">
+                    <button class="tab-btn active" data-tab="plots">Plots</button>
+                    <button class="tab-btn" data-tab="files">Download Files</button>
+                </div>
+
+                <div class="tab-content active" id="tab-plots">
+                    <h3>Light Curves</h3>
+                    <img id="plot-lightcurve" class="result-plot" alt="Light curves">
+                    
+                    <h3>DSS Field</h3>
+                    <img id="plot-field" class="result-plot" alt="DSS field">
+                </div>
+
+                <div class="tab-content" id="tab-files">
+                    <h3>Available Files</h3>
+                    <ul id="file-list" class="file-list"></ul>
+                </div>
+
+                <button id="new-analysis-btn" class="secondary-btn">Start New Analysis</button>
+            </section>
+
+            <!-- Error Section -->
+            <section class="card error-card" id="error-section" style="display:none;">
+                <h2>❌ Error</h2>
+                <div id="error-message"></div>
+                <button id="retry-btn">Try Again</button>
+            </section>
+        </div>
+
+        <footer>
+            <p>BHTOM Photometry Pipeline v1.0 | 
+               <a href="https://github.com/yourusername/bhtom_photometry" target="_blank">Documentation</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
