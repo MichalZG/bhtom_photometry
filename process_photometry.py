@@ -4,6 +4,7 @@ from astropy.coordinates import SkyCoord
 import astropy.units as u
 from astropy.time import Time
 import matplotlib.pyplot as plt
+import argparse
 
 def read_objects_data(filename: str) -> dict:
     """Read object definitions from objects.dat."""
@@ -195,9 +196,16 @@ def process_static_object_photometry(photometry_data: dict, target_coords: dict,
     
     return pd.DataFrame(results)
 
-def plot_magnitude_ratios(results: pd.DataFrame, save_path: str = 'magnitude_ratios.png'):
+def plot_magnitude_ratios(results: pd.DataFrame, save_path: str = 'magnitude_ratios.png', 
+                          ylim_sigma_factor: float = 3.0):
     """Plot magnitude ratios between target and comparison stars.
-    Optimized for shallow exoplanet transit detection."""
+    Optimized for shallow exoplanet transit detection.
+    
+    Args:
+        results: DataFrame with photometry results
+        save_path: Path to save the plot
+        ylim_sigma_factor: Y-axis limit factor (median ± factor * std), default: 3.0
+    """
     # Calculate magnitude differences
     results['TARGET_COMP1'] = results['TARGET_MAG'] - results['COMP1_MAG']
     results['TARGET_COMP2'] = results['TARGET_MAG'] - results['COMP2_MAG']
@@ -209,7 +217,7 @@ def plot_magnitude_ratios(results: pd.DataFrame, save_path: str = 'magnitude_rat
 
     # Create figure with 3 subplots
     fig, axes = plt.subplots(3, 1, figsize=(14, 10), sharex=True)
-    fig.suptitle(f'Differential Photometry - WASP-46 Transit\nMJD {time_offset:.5f} + hours', 
+    fig.suptitle(f'Differential Photometry\nMJD {time_offset:.5f} + hours', 
                  fontsize=14, fontweight='bold')
 
     # Plot 1: Target - Comp1 (main light curve)
@@ -220,7 +228,8 @@ def plot_magnitude_ratios(results: pd.DataFrame, save_path: str = 'magnitude_rat
     median1 = results['TARGET_COMP1'].median()
     std1 = results['TARGET_COMP1'].std()
     ax1.axhline(median1, color='red', linestyle='--', alpha=0.5, label=f'Median: {median1:.4f}')
-    ax1.set_ylim(median1 + 0.05, median1 - 0.05)  # Inverted, ±0.05 mag range
+    ylim_range1 = ylim_sigma_factor * std1
+    ax1.set_ylim(median1 + ylim_range1, median1 - ylim_range1)  # Inverted, ±(factor*σ) mag range
     ax1.set_ylabel('Target - Comp1 [mag]', fontsize=11)
     ax1.grid(True, alpha=0.3)
     ax1.legend(loc='upper right')
@@ -236,7 +245,8 @@ def plot_magnitude_ratios(results: pd.DataFrame, save_path: str = 'magnitude_rat
     median2 = results['TARGET_COMP2'].median()
     std2 = results['TARGET_COMP2'].std()
     ax2.axhline(median2, color='blue', linestyle='--', alpha=0.5, label=f'Median: {median2:.4f}')
-    ax2.set_ylim(median2 + 0.05, median2 - 0.05)  # Inverted, ±0.05 mag range
+    ylim_range2 = ylim_sigma_factor * std2
+    ax2.set_ylim(median2 + ylim_range2, median2 - ylim_range2)  # Inverted, ±(factor*σ) mag range
     ax2.set_ylabel('Target - Comp2 [mag]', fontsize=11)
     ax2.grid(True, alpha=0.3)
     ax2.legend(loc='upper right')
@@ -253,7 +263,8 @@ def plot_magnitude_ratios(results: pd.DataFrame, save_path: str = 'magnitude_rat
     median3 = results['COMP1_COMP2'].median()
     std3 = results['COMP1_COMP2'].std()
     ax3.axhline(median3, color='purple', linestyle='--', alpha=0.5, label=f'Median: {median3:.4f}')
-    ax3.set_ylim(median3 + 0.05, median3 - 0.05)  # Inverted, ±0.05 mag range
+    ylim_range3 = ylim_sigma_factor * std3
+    ax3.set_ylim(median3 + ylim_range3, median3 - ylim_range3)  # Inverted, ±(factor*σ) mag range
     ax3.set_ylabel('Comp1 - Comp2 [mag]', fontsize=11)
     ax3.set_xlabel('Time [hours from first observation]', fontsize=11)
     ax3.grid(True, alpha=0.3)
@@ -267,9 +278,62 @@ def plot_magnitude_ratios(results: pd.DataFrame, save_path: str = 'magnitude_rat
     plt.savefig(save_path, dpi=150)
     print(f"\nPlot saved to {save_path}")
 
+def filter_photometry_data(photometry_data: dict, filter_name: str = None) -> dict:
+    """Filter photometry data by band/filter.
+    
+    Args:
+        photometry_data: Dictionary with photometry data
+        filter_name: Filter name (e.g., 'R', 'V', 'I', 'g', 'r', 'i'). If None, return all data.
+        
+    Returns:
+        Filtered dictionary with photometry data
+    """
+    if filter_name is None:
+        return photometry_data
+    
+    filtered_data = {}
+    for data_id, data_dict in photometry_data.items():
+        calibration_data = data_dict.get('calibration_data', {})
+        band = calibration_data.get('band', '').upper()
+        
+        if band == filter_name.upper():
+            filtered_data[data_id] = data_dict
+    
+    return filtered_data
+
 def main():
     """Main function to process photometry data."""
     import os
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        description='Process differential photometry from BHTOM data',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='''
+Examples:
+  python process_photometry.py              # Process all filters
+  python process_photometry.py --filter R   # Process only R-band data
+  python process_photometry.py --filter V   # Process only V-band data
+  python process_photometry.py -f g         # Process only g-band data
+        '''
+    )
+    parser.add_argument(
+        '--filter', '-f',
+        type=str,
+        default=None,
+        help='Filter/band name to process (e.g., R, V, I, g, r, i). If not specified, all filters are processed.'
+    )
+    parser.add_argument(
+        '--ylim-sigma',
+        type=float,
+        default=3.0,
+        help='Y-axis limit factor: median ± (factor * std). Default: 3.0'
+    )
+    
+    args = parser.parse_args()
+    
+    # Configuration parameters
+    YLIM_SIGMA_FACTOR = args.ylim_sigma  # Y-axis limit factor: median ± (factor * std)
     
     # Create output directories
     os.makedirs('output', exist_ok=True)
@@ -291,7 +355,27 @@ def main():
     with open(data_file, 'rb') as f:
         import pickle
         photometry_data = pickle.load(f)
-    print(f"Read photometry data for {len(photometry_data)} epochs")
+    print(f"Read photometry data for {len(photometry_data)} epochs (all filters)")
+    
+    # Filter by band if specified
+    if args.filter:
+        print(f"\nFiltering data for filter: {args.filter}")
+        photometry_data = filter_photometry_data(photometry_data, args.filter)
+        print(f"After filtering: {len(photometry_data)} epochs in {args.filter} band")
+        
+        if len(photometry_data) == 0:
+            print(f"\nERROR: No data found for filter '{args.filter}'")
+            print("\nAvailable filters in the data:")
+            with open(data_file, 'rb') as f:
+                all_data = pickle.load(f)
+            filters = set()
+            for data_dict in all_data.values():
+                band = data_dict.get('calibration_data', {}).get('band', 'Unknown')
+                filters.add(band)
+            print(f"  {', '.join(sorted(filters))}")
+            return
+    else:
+        print("\nProcessing all filters (no filter specified)")
     
     # Prepare coordinates for static object photometry
     target_coords = {'ra': float(objects['target'].split(',')[1]), 'dec': float(objects['target'].split(',')[2])}
@@ -315,7 +399,8 @@ def main():
     print(f"\nProcessed {len(results)} measurements")
     
     # Plot magnitude ratios
-    plot_magnitude_ratios(results, save_path='plots/magnitude_ratios.png')
+    plot_magnitude_ratios(results, save_path='plots/magnitude_ratios.png', 
+                         ylim_sigma_factor=YLIM_SIGMA_FACTOR)
     
     print("\nExample results (first 3 measurements):")
     example = results.head(3)

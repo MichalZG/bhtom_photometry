@@ -84,7 +84,7 @@ time_hours_aij = (merged['MJD_other'] - time_offset) * 24
 
 # Create figure with 5 subplots (2 for light curves, 3 for residuals)
 fig, axs = plt.subplots(5, 1, figsize=(14, 16), height_ratios=[1.5, 1.5, 1, 1, 1])
-fig.suptitle(f'WASP-46 Transit Comparison: PSF (BHTOM) vs Aperture Photometry\nMJD {time_offset:.5f} + hours', 
+fig.suptitle(f'Photometry Comparison: PSF (BHTOM) vs Aperture (AIJ)\nMJD {time_offset:.5f} + hours', 
              fontsize=14, fontweight='bold')
 plt.subplots_adjust(hspace=0.3)
 

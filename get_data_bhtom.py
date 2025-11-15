@@ -17,36 +17,40 @@ from astropy.time import Time
 import numpy as np
 import os
 
-# API Configuration
-API_BASE_URL = "https://bhtom.space/common/api/"
-
-# Load API credentials from environment variables or config file
-def load_api_credentials():
-    """Load API credentials from environment variables or config.py file."""
+# Load API credentials and configuration from environment variables or config file
+def load_api_config():
+    """Load API configuration and credentials from environment variables or config.py file."""
     # Try to load from environment variables first
+    api_base_url = os.getenv('BHTOM_API_BASE_URL')
     api_token = os.getenv('BHTOM_API_TOKEN')
     csrf_token = os.getenv('BHTOM_CSRF_TOKEN')
     
     # If not in environment, try to import from config.py
     if not api_token or not csrf_token:
         try:
-            from config import BHTOM_API_TOKEN, BHTOM_CSRF_TOKEN
+            from config import BHTOM_API_TOKEN, BHTOM_CSRF_TOKEN, BHTOM_API_BASE_URL
+            if not api_base_url:
+                api_base_url = BHTOM_API_BASE_URL
             api_token = BHTOM_API_TOKEN
             csrf_token = BHTOM_CSRF_TOKEN
         except ImportError:
             raise ValueError(
                 "BHTOM API credentials not found!\n"
                 "Please either:\n"
-                "1. Set environment variables: BHTOM_API_TOKEN and BHTOM_CSRF_TOKEN\n"
-                "2. Create config.py with BHTOM_API_TOKEN and BHTOM_CSRF_TOKEN variables\n"
+                "1. Set environment variables: BHTOM_API_BASE_URL, BHTOM_API_TOKEN and BHTOM_CSRF_TOKEN\n"
+                "2. Create config.py with BHTOM_API_BASE_URL, BHTOM_API_TOKEN and BHTOM_CSRF_TOKEN variables\n"
                 "Contact BHTOM administrators to obtain API credentials."
             )
     
-    return api_token, csrf_token
+    # Default API base URL if not provided
+    if not api_base_url:
+        api_base_url = "https://bh-tom2.astrolabs.pl/common/api/"
+    
+    return api_base_url, api_token, csrf_token
 
-# Load credentials
+# Load credentials and API configuration
 try:
-    API_TOKEN, CSRF_TOKEN = load_api_credentials()
+    API_BASE_URL, API_TOKEN, CSRF_TOKEN = load_api_config()
     HEADERS = {
         'accept': 'application/json',
         'Authorization': f'Token {API_TOKEN}',
@@ -55,6 +59,7 @@ try:
     }
 except ValueError as e:
     print(f"WARNING: {e}")
+    API_BASE_URL = None
     HEADERS = None
 
 def get_data_products(target_name: str, mjd_min: float, mjd_max: float) -> pd.DataFrame:

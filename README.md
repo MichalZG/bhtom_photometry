@@ -1,6 +1,6 @@
 # BHTOM Differential Photometry Pipeline
 
-A Python pipeline for downloading and processing photometric data from the [BHTOM (Black Hole TOM)](https://bhtom.space/) database, specialized in **differential photometry** for stationary celestial objects such as variable stars, eclipsing binaries, and transiting exoplanets.
+A Python pipeline for downloading and processing photometric data from the [BHTOM (Black Hole TOM)](https://bh-tom2.astrolabs.pl/) database, specialized in **differential photometry** for stationary celestial objects such as variable stars, eclipsing binaries, and transiting exoplanets.
 
 ## 🎯 Purpose
 
@@ -65,7 +65,7 @@ This pipeline automates the process of:
    
    Edit `config.py` and add your BHTOM API credentials.
    
-   **To obtain credentials:** Contact BHTOM administrators at https://bhtom.space/
+   **To obtain credentials:** Contact BHTOM administrators at https://bh-tom2.astrolabs.pl/
    
    See [SETUP.md](SETUP.md) for detailed configuration instructions.
 
@@ -99,10 +99,21 @@ This downloads photometry data and saves it to `data/photometry_data.pkl`.
 ### Step 3: Process Photometry
 
 ```bash
+# Process all filters
 python process_photometry.py
+
+# OR process specific filter only
+python process_photometry.py --filter R
+python process_photometry.py --filter V
+python process_photometry.py -f g
 ```
 
+**Options:**
+- `--filter <name>` or `-f <name>`: Process only specific filter (e.g., R, V, I, g, r, i)
+- `--ylim-sigma <value>`: Y-axis range in plots (median ± value × σ), default: 3.0
+
 This performs:
+- Filtering by photometric band (if specified)
 - Cross-matching of objects across epochs
 - Differential photometry (Target - Comp1, Target - Comp2)
 - Quality checks (Comp1 - Comp2 stability)
@@ -193,14 +204,18 @@ bhtom_photometry/
 ### BHTOM API Configuration
 
 The BHTOM API configuration is in `get_data_bhtom.py`:
-- **API Base URL:** `https://bhtom.space/common/api/`
+- **API Base URL:** Configured in `config.py` (default: `https://bh-tom2.astrolabs.pl/common/api/`)
 - **Authentication:** Token-based (configured via `config.py` or environment variables)
 
 ### Photometry Parameters
 
 In `process_photometry.py`:
+- `--filter`: Filter/band selection (e.g., R, V, I, g, r, i). If not specified, all filters are processed
+- `--ylim-sigma`: Y-axis plot range factor (median ± factor × σ), default: 3.0
 - `max_distance`: Maximum matching radius (default: 5.0 arcsec)
 - Cross-matching uses astropy `SkyCoord` for accurate coordinate matching
+
+**Note:** The BHTOM API does not support filter selection during data download. All available filters are downloaded, and filtering is performed during processing.
 
 ## 📈 Example: WASP-46 Transit Analysis
 
@@ -219,8 +234,9 @@ This example demonstrates analyzing a transit of the hot Jupiter WASP-46b:
    ```
    Result: 79 epochs downloaded
 
-3. **Process photometry**:
+3. **Process photometry** (R-band only):
    ```bash
+   python process_photometry.py --filter R
    python process_photometry.py
    ```
    Result: High-precision differential light curves with σ ~ 0.01 mag
@@ -248,7 +264,7 @@ The pipeline includes several quality control features:
 ## 📝 Citation
 
 If you use this pipeline in your research, please acknowledge:
-- **BHTOM Database:** [https://bhtom.space/](https://bhtom.space/)
+- **BHTOM Database:** [https://bh-tom2.astrolabs.pl/](https://bh-tom2.astrolabs.pl/)
 - This pipeline (link to your repository)
 
 ## 👥 Contributing

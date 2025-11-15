@@ -28,6 +28,7 @@ You need BHTOM API credentials to download photometry data.
 
 2. Edit `config.py` and add your credentials:
    ```python
+   BHTOM_API_BASE_URL = "https://bh-tom2.astrolabs.pl/common/api/"
    BHTOM_API_TOKEN = "your_actual_token_here"
    BHTOM_CSRF_TOKEN = "your_actual_csrf_token_here"
    ```
@@ -40,21 +41,24 @@ Set environment variables before running the scripts:
 
 **Linux/Mac:**
 ```bash
+export BHTOM_API_BASE_URL="https://bh-tom2.astrolabs.pl/common/api/"
 export BHTOM_API_TOKEN="your_token_here"
 export BHTOM_CSRF_TOKEN="your_csrf_token_here"
 ```
 
 **Windows:**
 ```cmd
+set BHTOM_API_BASE_URL=https://bh-tom2.astrolabs.pl/common/api/
 set BHTOM_API_TOKEN=your_token_here
 set BHTOM_CSRF_TOKEN=your_csrf_token_here
 ```
 
 ### 3. Obtain API Credentials
 
-Contact BHTOM administrators at https://bhtom.space/ to request API access.
+Contact BHTOM administrators at https://bh-tom2.astrolabs.pl/ to request API access.
 
 You will need:
+- **API Base URL** - BHTOM server address (default: https://bh-tom2.astrolabs.pl/common/api/)
 - **API Token** - for authentication
 - **CSRF Token** - for security
 

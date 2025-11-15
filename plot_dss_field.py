@@ -98,7 +98,7 @@ def plot_dss_field():
                     bbox=dict(facecolor='white', alpha=0.7),
                     color=colors[obj_type])
     
-    plt.title(f"DSS2 Red image of HWvir field\n{target_ra:.3f}°, {target_dec:.3f}°")
+    plt.title(f"DSS2 Red Image - Target Field\n{target_ra:.3f}°, {target_dec:.3f}°")
     plt.colorbar(label='Flux')
     plt.grid(True, alpha=0.3)
     plt.legend()

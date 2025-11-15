@@ -1,9 +1,12 @@
 # BHTOM API Configuration
 # 
 # Copy this file to config.py and fill in your credentials
-# Contact BHTOM administrators at https://bhtom.space/ to obtain API access
+# Contact BHTOM administrators at https://bh-tom2.astrolabs.pl/ to obtain API access
 #
 # DO NOT commit config.py to version control!
+
+# BHTOM API Base URL
+BHTOM_API_BASE_URL = "https://bh-tom2.astrolabs.pl/common/api/"
 
 # Your BHTOM API Token
 BHTOM_API_TOKEN = "your_api_token_here"
