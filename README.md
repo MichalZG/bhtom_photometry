@@ -102,15 +102,17 @@ This downloads photometry data and saves it to `data/photometry_data.pkl`.
 # Process all filters
 python process_photometry.py
 
-# OR process specific filter only
-python process_photometry.py --filter R
-python process_photometry.py --filter V
-python process_photometry.py -f g
+# OR process specific filter only (use exact BHTOM filter names)
+python process_photometry.py --filter GaiaSP/R
+python process_photometry.py --filter GaiaSP/g
+python process_photometry.py -f "GaiaSP/i"
 ```
 
 **Options:**
-- `--filter <name>` or `-f <name>`: Process only specific filter (e.g., R, V, I, g, r, i)
+- `--filter <name>` or `-f <name>`: Process only specific filter using exact BHTOM filter name (e.g., GaiaSP/R, GaiaSP/g, GaiaSP/i)
 - `--ylim-sigma <value>`: Y-axis range in plots (median ± value × σ), default: 3.0
+
+**Note:** Filter names must match exactly the BHTOM filter naming convention (e.g., use `GaiaSP/R`, not just `R`)
 
 This performs:
 - Filtering by photometric band (if specified)
@@ -210,12 +212,15 @@ The BHTOM API configuration is in `get_data_bhtom.py`:
 ### Photometry Parameters
 
 In `process_photometry.py`:
-- `--filter`: Filter/band selection (e.g., R, V, I, g, r, i). If not specified, all filters are processed
+- `--filter`: Filter/band selection using exact BHTOM filter names (e.g., GaiaSP/R, GaiaSP/g, GaiaSP/i, GaiaSP/V). If not specified, all filters are processed
 - `--ylim-sigma`: Y-axis plot range factor (median ± factor × σ), default: 3.0
 - `max_distance`: Maximum matching radius (default: 5.0 arcsec)
 - Cross-matching uses astropy `SkyCoord` for accurate coordinate matching
 
-**Note:** The BHTOM API does not support filter selection during data download. All available filters are downloaded, and filtering is performed during processing.
+**Note:** 
+- Filter names must match exactly the BHTOM convention (case-insensitive)
+- Common BHTOM filters: GaiaSP/R, GaiaSP/g, GaiaSP/i, GaiaSP/V
+- The BHTOM API does not support filter selection during data download. All available filters are downloaded, and filtering is performed during processing.
 
 ## 📈 Example: WASP-46 Transit Analysis
 
@@ -234,9 +239,9 @@ This example demonstrates analyzing a transit of the hot Jupiter WASP-46b:
    ```
    Result: 79 epochs downloaded
 
-3. **Process photometry** (R-band only):
+3. **Process photometry** (GaiaSP/R-band only):
    ```bash
-   python process_photometry.py --filter R
+   python process_photometry.py --filter GaiaSP/R
    python process_photometry.py
    ```
    Result: High-precision differential light curves with σ ~ 0.01 mag

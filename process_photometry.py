@@ -279,24 +279,40 @@ def plot_magnitude_ratios(results: pd.DataFrame, save_path: str = 'magnitude_rat
     print(f"\nPlot saved to {save_path}")
 
 def filter_photometry_data(photometry_data: dict, filter_name: str = None) -> dict:
-    """Filter photometry data by band/filter.
+    """Filter photometry data by band/filter using exact BHTOM filter names.
     
     Args:
         photometry_data: Dictionary with photometry data
-        filter_name: Filter name (e.g., 'R', 'V', 'I', 'g', 'r', 'i'). If None, return all data.
+        filter_name: Exact BHTOM filter name (e.g., 'GaiaSP/R', 'GaiaSP/g', 'GaiaSP/i'). 
+                     If None, return all data.
         
     Returns:
         Filtered dictionary with photometry data
+        
+    Note:
+        Filter names must match exactly (case-insensitive) the filter names used by BHTOM.
+        Common BHTOM filters: GaiaSP/R, GaiaSP/g, GaiaSP/i, GaiaSP/V
     """
     if filter_name is None:
         return photometry_data
     
     filtered_data = {}
+    filter_upper = filter_name.upper()
+    
     for data_id, data_dict in photometry_data.items():
         calibration_data = data_dict.get('calibration_data', {})
-        band = calibration_data.get('band', '').upper()
         
-        if band == filter_name.upper():
+        # Check multiple possible filter field names in BHTOM data
+        band = calibration_data.get('band', '')
+        if not band:
+            band = calibration_data.get('calib_survey_filter', '')
+        if not band:
+            band = calibration_data.get('filter', '')
+        
+        band_upper = str(band).upper()
+        
+        # Exact match only - must use full BHTOM filter name
+        if band_upper == filter_upper:
             filtered_data[data_id] = data_dict
     
     return filtered_data
@@ -311,17 +327,19 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
-  python process_photometry.py              # Process all filters
-  python process_photometry.py --filter R   # Process only R-band data
-  python process_photometry.py --filter V   # Process only V-band data
-  python process_photometry.py -f g         # Process only g-band data
+  python process_photometry.py                      # Process all filters
+  python process_photometry.py --filter GaiaSP/R   # Process only GaiaSP/R-band data
+  python process_photometry.py --filter GaiaSP/g   # Process only GaiaSP/g-band data
+  python process_photometry.py -f "GaiaSP/i"       # Process only GaiaSP/i-band data
+  
+Note: Use exact BHTOM filter names (e.g., GaiaSP/R, not just R)
         '''
     )
     parser.add_argument(
         '--filter', '-f',
         type=str,
         default=None,
-        help='Filter/band name to process (e.g., R, V, I, g, r, i). If not specified, all filters are processed.'
+        help='Exact BHTOM filter name (e.g., GaiaSP/R, GaiaSP/g, GaiaSP/i). If not specified, all filters are processed.'
     )
     parser.add_argument(
         '--ylim-sigma',
@@ -370,9 +388,11 @@ Examples:
                 all_data = pickle.load(f)
             filters = set()
             for data_dict in all_data.values():
-                band = data_dict.get('calibration_data', {}).get('band', 'Unknown')
+                calibration = data_dict.get('calibration_data', {})
+                band = calibration.get('band') or calibration.get('calib_survey_filter') or calibration.get('filter', 'Unknown')
                 filters.add(band)
-            print(f"  {', '.join(sorted(filters))}")
+            for f in sorted(filters):
+                print(f"  • {f}")
             return
     else:
         print("\nProcessing all filters (no filter specified)")
