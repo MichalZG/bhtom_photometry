@@ -24,13 +24,28 @@ def run_pipeline(job_id, target_name, mjd_min, mjd_max, filter_name, objects_dat
     try:
         jobs[job_id]['status'] = 'running'
         jobs[job_id]['step'] = 'Saving object coordinates'
+        jobs[job_id]['logs'] = []
+        
+        def add_log(message):
+            """Add a log message."""
+            jobs[job_id]['logs'].append(message)
+        
+        add_log(f"Starting pipeline for {target_name}")
+        add_log(f"MJD range: {mjd_min} - {mjd_max}")
+        if filter_name and filter_name != 'all':
+            add_log(f"Filter: {filter_name}")
         
         # Save objects.dat
+        add_log("Saving object coordinates to objects.dat")
         with open('objects.dat', 'w') as f:
             f.write(objects_data)
+        add_log("✓ Object coordinates saved")
         
         # Step 1: Download data
         jobs[job_id]['step'] = 'Downloading data from BHTOM'
+        add_log("\n--- Step 1: Downloading data from BHTOM ---")
+        add_log(f"Running: get_data_bhtom.py {target_name} --mjd-range {mjd_min} {mjd_max}")
+        
         result = subprocess.run(
             ['./venv/bin/python', 'get_data_bhtom.py', target_name, 
              '--mjd-range', str(mjd_min), str(mjd_max)],
@@ -40,17 +55,32 @@ def run_pipeline(job_id, target_name, mjd_min, mjd_max, filter_name, objects_dat
         )
         
         if result.returncode != 0:
+            add_log(f"ERROR: Download failed")
+            add_log(result.stderr)
             jobs[job_id]['status'] = 'error'
             jobs[job_id]['error'] = f"Download failed: {result.stderr}"
             return
         
         # Parse number of epochs from output
+        epochs_count = None
         for line in result.stdout.split('\n'):
             if 'data products with valid MJD' in line:
-                jobs[job_id]['epochs_downloaded'] = line.split()[1]
+                epochs_count = line.split()[1]
+                jobs[job_id]['epochs_downloaded'] = epochs_count
+                add_log(f"✓ Downloaded {epochs_count} epochs")
+                break
+        
+        if epochs_count:
+            add_log(f"✓ Data saved to data/photometry_data.pkl")
         
         # Step 2: Process photometry
         jobs[job_id]['step'] = 'Processing photometry'
+        add_log("\n--- Step 2: Processing photometry ---")
+        cmd_str = 'process_photometry.py'
+        if filter_name and filter_name != 'all':
+            cmd_str += f' --filter {filter_name}'
+        add_log(f"Running: {cmd_str}")
+        
         cmd = ['./venv/bin/python', 'process_photometry.py']
         if filter_name and filter_name != 'all':
             cmd.extend(['--filter', filter_name])
@@ -63,18 +93,30 @@ def run_pipeline(job_id, target_name, mjd_min, mjd_max, filter_name, objects_dat
         )
         
         if result.returncode != 0:
+            add_log(f"ERROR: Processing failed")
+            add_log(result.stderr)
             jobs[job_id]['status'] = 'error'
             jobs[job_id]['error'] = f"Processing failed: {result.stderr}"
             return
         
+        add_log(f"✓ Photometry processed successfully")
+        add_log(f"✓ Results saved to output/photometry_results.csv")
+        add_log(f"✓ Plot saved to plots/magnitude_ratios.png")
+        
         # Step 3: Generate DSS field plot
         jobs[job_id]['step'] = 'Generating DSS field plot'
+        add_log("\n--- Step 3: Generating DSS field plot ---")
+        add_log(f"Running: plot_dss_field.py")
+        
         result = subprocess.run(
             ['./venv/bin/python', 'plot_dss_field.py'],
             capture_output=True,
             text=True,
             timeout=300
         )
+        
+        add_log(f"✓ DSS field plot generated")
+        add_log(f"✓ Plot saved to plots/dss_field.png")
         
         # Find generated files
         jobs[job_id]['files'] = {
@@ -85,11 +127,16 @@ def run_pipeline(job_id, target_name, mjd_min, mjd_max, filter_name, objects_dat
         
         jobs[job_id]['status'] = 'completed'
         jobs[job_id]['step'] = 'Pipeline completed successfully'
+        add_log("\n" + "="*50)
+        add_log("✓✓✓ PIPELINE COMPLETED SUCCESSFULLY ✓✓✓")
+        add_log("="*50)
         
     except subprocess.TimeoutExpired:
+        add_log(f"\nERROR: Pipeline timeout (>5 minutes)")
         jobs[job_id]['status'] = 'error'
         jobs[job_id]['error'] = 'Pipeline timeout (>5 minutes)'
     except Exception as e:
+        add_log(f"\nERROR: {str(e)}")
         jobs[job_id]['status'] = 'error'
         jobs[job_id]['error'] = str(e)
 

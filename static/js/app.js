@@ -126,6 +126,7 @@ function updateProgress(job) {
     const progressFill = document.getElementById('progress-fill');
     const progressText = document.getElementById('progress-text');
     const progressDetails = document.getElementById('progress-details');
+    const logsWindow = document.getElementById('logs-window');
     
     let progress = 0;
     if (job.status === 'queued') progress = 10;
@@ -144,6 +145,13 @@ function updateProgress(job) {
         details += `Epochs downloaded: ${job.epochs_downloaded}\n`;
     }
     progressDetails.textContent = details;
+    
+    // Update logs
+    if (job.logs && job.logs.length > 0) {
+        logsWindow.textContent = job.logs.join('\n');
+        // Auto-scroll to bottom
+        logsWindow.scrollTop = logsWindow.scrollHeight;
+    }
 }
 
 // Show results
