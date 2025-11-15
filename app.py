@@ -169,10 +169,17 @@ def available_filters():
     """Get list of common BHTOM filters."""
     filters = [
         {'value': 'all', 'label': 'All filters'},
-        {'value': 'GaiaSP/R', 'label': 'GaiaSP/R (Red)'},
+        # SDSS-like filters (lowercase)
+        {'value': 'GaiaSP/u', 'label': 'GaiaSP/u (Ultraviolet)'},
         {'value': 'GaiaSP/g', 'label': 'GaiaSP/g (Green)'},
+        {'value': 'GaiaSP/r', 'label': 'GaiaSP/r (Red)'},
         {'value': 'GaiaSP/i', 'label': 'GaiaSP/i (Near-IR)'},
+        {'value': 'GaiaSP/z', 'label': 'GaiaSP/z (Infrared)'},
+        # Johnson-Cousins filters (uppercase)
+        {'value': 'GaiaSP/U', 'label': 'GaiaSP/U (Ultraviolet)'},
+        {'value': 'GaiaSP/B', 'label': 'GaiaSP/B (Blue)'},
         {'value': 'GaiaSP/V', 'label': 'GaiaSP/V (Visual)'},
+        {'value': 'GaiaSP/R', 'label': 'GaiaSP/R (Red)'},
     ]
     return jsonify(filters)
 
